@@ -5,13 +5,14 @@ import { useAppContext } from '../context/AppContext'
 
 const Onboarding = () => {
   const navigate = useNavigate()
-  const { userProfile, setUserProfile } = useAppContext()
-  const [currentStep, setCurrentStep] = useState(1)
+  const { setUserProfile } = useAppContext()
+  const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState({
     name: '',
     background: '',
     experience: '',
-    goals: ''
+    goals: '',
+    preferredLearningStyle: ''
   })
 
   const handleInputChange = (field: string, value: string) => {

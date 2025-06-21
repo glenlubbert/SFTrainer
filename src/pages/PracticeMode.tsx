@@ -1,45 +1,34 @@
 import { useState } from 'react'
-import { MessageCircle, Lightbulb, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
-import { coachingSteps, CoachingStep } from '../data/coachingSteps'
+import { Lightbulb, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { coachingSteps } from '../data/coachingSteps'
 
-const PracticeMode = () => {
-  const { isTrainerMode, userProfile } = useAppContext()
+export default function PracticeMode() {
+  const { isTrainerMode } = useAppContext()
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [coachResponse, setCoachResponse] = useState('')
+  const [completedSteps, setCompletedSteps] = useState<string[]>([])
+  const [userResponse, setUserResponse] = useState('')
   const [feedback, setFeedback] = useState('')
-  const [showSidePanel, setShowSidePanel] = useState(true)
-  const [completedSteps, setCompletedSteps] = useState<number[]>([])
 
   const currentStep = coachingSteps[currentStepIndex]
-  const isCompleted = completedSteps.includes(currentStep.id)
 
-  const generateFeedback = (step: CoachingStep, response: string) => {
-    // This would integrate with GPT API in a real implementation
-    const feedbackPrompts = isTrainerMode ? [
-      "How would you teach this step to a new coach?",
-      "What might confuse a new coach about this step?",
-      "What are the key principles to emphasize?"
-    ] : step.reflectivePrompts
-
-    const randomPrompt = feedbackPrompts[Math.floor(Math.random() * feedbackPrompts.length)]
-    
-    return `Great work on Step ${step.id}: ${step.title}! 
-
-${randomPrompt}
-
-Your response showed good understanding of the ${step.title.toLowerCase()} phase. Remember to:
-${step.coachTips.slice(0, 2).map(tip => `• ${tip}`).join('\n')}
-
-Keep practicing and you'll continue to improve!`
+  const generateFeedback = () => {
+    // Simulated feedback generation
+    const feedbackOptions = [
+      "Great approach! You're focusing on the client's strengths.",
+      "Consider asking more open-ended questions to explore possibilities.",
+      "Excellent use of scaling questions to measure progress.",
+      "Try to avoid giving advice and instead help the client find their own solutions."
+    ]
+    return feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)]
   }
 
   const handleSubmitResponse = () => {
-    if (coachResponse.trim()) {
-      const newFeedback = generateFeedback(currentStep, coachResponse)
+    if (userResponse.trim()) {
+      const newFeedback = generateFeedback()
       setFeedback(newFeedback)
-      if (!completedSteps.includes(currentStep.id)) {
-        setCompletedSteps([...completedSteps, currentStep.id])
+      if (!completedSteps.includes(currentStep.id.toString())) {
+        setCompletedSteps([...completedSteps, currentStep.id.toString()])
       }
     }
   }
@@ -47,7 +36,7 @@ Keep practicing and you'll continue to improve!`
   const handleNextStep = () => {
     if (currentStepIndex < coachingSteps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1)
-      setCoachResponse('')
+      setUserResponse('')
       setFeedback('')
     }
   }
@@ -55,14 +44,14 @@ Keep practicing and you'll continue to improve!`
   const handlePreviousStep = () => {
     if (currentStepIndex > 0) {
       setCurrentStepIndex(currentStepIndex - 1)
-      setCoachResponse('')
+      setUserResponse('')
       setFeedback('')
     }
   }
 
   const getStepStatus = (stepId: number) => {
     if (stepId === currentStep.id) return 'active'
-    if (completedSteps.includes(stepId)) return 'completed'
+    if (completedSteps.includes(stepId.toString())) return 'completed'
     return 'pending'
   }
 
@@ -87,14 +76,6 @@ Keep practicing and you'll continue to improve!`
               <h2 className="text-xl font-semibold text-gray-900">
                 Step {currentStep.id} of 9: {currentStep.title}
               </h2>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setShowSidePanel(!showSidePanel)}
-                  className="btn-secondary"
-                >
-                  {showSidePanel ? 'Hide' : 'Show'} Tips
-                </button>
-              </div>
             </div>
 
             {/* Step Indicators */}
@@ -139,8 +120,8 @@ Keep practicing and you'll continue to improve!`
               <h3 className="text-lg font-semibold text-gray-900">Your Response</h3>
             </div>
             <textarea
-              value={coachResponse}
-              onChange={(e) => setCoachResponse(e.target.value)}
+              value={userResponse}
+              onChange={(e) => setUserResponse(e.target.value)}
               placeholder="Type your coaching response here..."
               rows={6}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coaching-green focus:border-transparent"
@@ -148,7 +129,7 @@ Keep practicing and you'll continue to improve!`
             <div className="flex justify-end mt-4">
               <button
                 onClick={handleSubmitResponse}
-                disabled={!coachResponse.trim()}
+                disabled={!userResponse.trim()}
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Submit Response
@@ -191,57 +172,53 @@ Keep practicing and you'll continue to improve!`
         </div>
 
         {/* Side Panel */}
-        {showSidePanel && (
-          <div className="space-y-6">
-            {/* Coach Tips */}
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Coach Tips</h3>
-              <ul className="space-y-2">
-                {currentStep.coachTips.map((tip, index) => (
-                  <li key={index} className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-coaching-green rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700 text-sm">{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="space-y-6">
+          {/* Coach Tips */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Coach Tips</h3>
+            <ul className="space-y-2">
+              {currentStep.coachTips.map((tip, index) => (
+                <li key={index} className="flex items-start space-x-2">
+                  <div className="w-2 h-2 bg-coaching-green rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-gray-700 text-sm">{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Reflective Prompts */}
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {isTrainerMode ? 'Teaching Prompts' : 'Reflective Prompts'}
-              </h3>
-              <ul className="space-y-2">
-                {currentStep.reflectivePrompts.map((prompt, index) => (
-                  <li key={index} className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-coaching-blue rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700 text-sm">{prompt}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Reflective Prompts */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isTrainerMode ? 'Teaching Prompts' : 'Reflective Prompts'}
+            </h3>
+            <ul className="space-y-2">
+              {currentStep.reflectivePrompts.map((prompt, index) => (
+                <li key={index} className="flex items-start space-x-2">
+                  <div className="w-2 h-2 bg-coaching-blue rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-gray-700 text-sm">{prompt}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Progress */}
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Progress</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Completed Steps:</span>
-                  <span className="font-medium">{completedSteps.length}/9</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-coaching-green h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(completedSteps.length / 9) * 100}%` }}
-                  ></div>
-                </div>
+          {/* Progress */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Progress</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Completed Steps:</span>
+                <span className="font-medium">{completedSteps.length}/9</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-coaching-green h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(completedSteps.length / 9) * 100}%` }}
+                ></div>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
-}
-
-export default PracticeMode 
+} 

@@ -12,11 +12,10 @@ interface QuizQuestion {
 }
 
 const QuizMode = () => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [showExplanation, setShowExplanation] = useState(false)
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
   const [score, setScore] = useState(0)
-  const [completed, setCompleted] = useState(false)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [quizCompleted, setQuizCompleted] = useState(false)
 
   const quizQuestions: QuizQuestion[] = [
     {
@@ -92,11 +91,10 @@ const QuizMode = () => {
   ]
 
   const currentQuestion = quizQuestions[currentQuestionIndex]
-  const isCorrect = selectedAnswer === currentQuestion.correctAnswer
   const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1
 
   const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex)
+    setSelectedAnswer(answerIndex.toString())
     if (answerIndex === currentQuestion.correctAnswer) {
       setScore(score + 1)
     }
@@ -104,20 +102,18 @@ const QuizMode = () => {
 
   const handleNextQuestion = () => {
     if (isLastQuestion) {
-      setCompleted(true)
+      setQuizCompleted(true)
     } else {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
       setSelectedAnswer(null)
-      setShowExplanation(false)
     }
   }
 
   const handleRestart = () => {
     setCurrentQuestionIndex(0)
     setSelectedAnswer(null)
-    setShowExplanation(false)
     setScore(0)
-    setCompleted(false)
+    setQuizCompleted(false)
   }
 
   const getScoreMessage = () => {
@@ -127,7 +123,7 @@ const QuizMode = () => {
     return { message: 'Keep practicing! Review the explanations and try again.', color: 'text-orange-600' }
   }
 
-  if (completed) {
+  if (quizCompleted) {
     const scoreMessage = getScoreMessage()
     return (
       <div className="max-w-4xl mx-auto">
@@ -215,7 +211,7 @@ const QuizMode = () => {
                 onClick={() => handleAnswerSelect(index)}
                 disabled={selectedAnswer !== null}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  selectedAnswer === index
+                  selectedAnswer === index.toString()
                     ? index === currentQuestion.correctAnswer
                       ? 'border-green-500 bg-green-50'
                       : 'border-red-500 bg-red-50'
@@ -224,13 +220,13 @@ const QuizMode = () => {
               >
                 <div className="flex items-start space-x-3">
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                    selectedAnswer === index
+                    selectedAnswer === index.toString()
                       ? index === currentQuestion.correctAnswer
                         ? 'border-green-500 bg-green-500'
                         : 'border-red-500 bg-red-500'
                       : 'border-gray-300'
                   }`}>
-                    {selectedAnswer === index && (
+                    {selectedAnswer === index.toString() && (
                       index === currentQuestion.correctAnswer ? (
                         <CheckCircle className="w-4 h-4 text-white" />
                       ) : (

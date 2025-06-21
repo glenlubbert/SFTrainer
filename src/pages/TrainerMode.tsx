@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { Users, BookOpen, Target, Brain, Star, MessageSquare } from 'lucide-react'
-import { useAppContext } from '../context/AppContext'
+import { Users, BookOpen, Target, Brain, Star } from 'lucide-react'
 
-const TrainerMode = () => {
-  const { userProfile } = useAppContext()
+export default function TrainerMode() {
   const [activeTab, setActiveTab] = useState('overview')
 
   const tabs = [
@@ -280,6 +278,4 @@ const TrainerMode = () => {
       {renderTabContent()}
     </div>
   )
-}
-
-export default TrainerMode 
+} 
