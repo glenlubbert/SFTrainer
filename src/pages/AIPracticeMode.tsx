@@ -160,29 +160,55 @@ export default function AIPracticeMode() {
   };
 
   // API Configuration Instructions Component
-  const APIConfigInstructions = () => (
-    <div className="card mb-4 sm:mb-6 border-2 border-[#EB5931] bg-[#F5AC3A]/10">
-      <div className="flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#EB5931] mt-1 flex-shrink-0" />
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold text-[#2F5169] mb-2">OpenAI API Setup Required</h3>
-          <p className="text-sm text-gray-700 mb-3">
-            To use the AI Practice Mode, you need to configure your OpenAI API key.
-          </p>
-          <div className="bg-gray-100 p-3 rounded-lg text-xs sm:text-sm font-mono mb-3">
-            <p className="mb-2">1. Create a file called <code>.env.local</code> in your project root</p>
-            <p className="mb-2">2. Add your OpenAI API key:</p>
-            <p className="text-[#2F5169] break-all">VITE_OPENAI_API_KEY=your_actual_api_key_here</p>
+  const APIConfigInstructions = () => {
+    const isProduction = import.meta.env.PROD;
+    
+    if (isProduction) {
+      return (
+        <div className="card mb-4 sm:mb-6 border-2 border-blue-500 bg-blue-50">
+          <div className="flex items-start gap-3">
+            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mt-1 flex-shrink-0" />
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-[#2F5169] mb-2">AI Practice Mode - Local Development Only</h3>
+              <p className="text-sm text-gray-700 mb-3">
+                The AI Practice Mode with ChatGPT integration is available when running the app locally with your own OpenAI API key.
+              </p>
+              <div className="text-xs sm:text-sm text-gray-600 space-y-1">
+                <p>• Clone the repository to your local machine</p>
+                <p>• Add your OpenAI API key to a <code>.env.local</code> file</p>
+                <p>• Run <code>npm run dev</code> to start the development server</p>
+                <p>• The AI features will work locally but not in this deployed version</p>
+              </div>
+            </div>
           </div>
-          <div className="text-xs sm:text-sm text-gray-600 space-y-1">
-            <p>• Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[#2F5169] underline">OpenAI Platform</a></p>
-            <p>• Restart your development server after adding the key</p>
-            <p>• The API key is only used locally and never sent to our servers</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="card mb-4 sm:mb-6 border-2 border-[#EB5931] bg-[#F5AC3A]/10">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#EB5931] mt-1 flex-shrink-0" />
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-[#2F5169] mb-2">OpenAI API Setup Required</h3>
+            <p className="text-sm text-gray-700 mb-3">
+              To use the AI Practice Mode, you need to configure your OpenAI API key.
+            </p>
+            <div className="bg-gray-100 p-3 rounded-lg text-xs sm:text-sm font-mono mb-3">
+              <p className="mb-2">1. Create a file called <code>.env.local</code> in your project root</p>
+              <p className="mb-2">2. Add your OpenAI API key:</p>
+              <p className="text-[#2F5169] break-all">VITE_OPENAI_API_KEY=your_actual_api_key_here</p>
+            </div>
+            <div className="text-xs sm:text-sm text-gray-600 space-y-1">
+              <p>• Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[#2F5169] underline">OpenAI Platform</a></p>
+              <p>• Restart your development server after adding the key</p>
+              <p>• The API key is only used locally and never sent to our servers</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D5EDF0] to-[#b8e0e5] p-2 sm:p-4">
