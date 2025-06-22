@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImg from '../assets/stamina-lab-logo.png';
 
 interface LogoProps {
   className?: string;
@@ -25,7 +26,7 @@ const Logo: React.FC<LogoProps> = ({
   return (
     <div className={`flex items-center ${className}`}>
       <img 
-        src="/src/assets/stamina-lab-logo.png" 
+        src={logoImg} 
         alt="Stamina Lab" 
         className={`${sizeClasses[size]} ${variantClasses[variant]}`}
       />
