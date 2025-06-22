@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Home, Users, BookOpen, Target, Brain } from 'lucide-react'
+import { Menu, X, Home, Users, BookOpen, Target, Brain, MessageCircle } from 'lucide-react'
 import Logo from './Logo'
 
 export default function Navigation() {
@@ -8,8 +8,9 @@ export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
-    { path: '/', label: 'Onboarding', icon: Home },
+    { path: '/', label: 'Home', icon: Home },
     { path: '/practice', label: 'Practice Mode', icon: Target },
+    { path: '/ai-practice', label: 'AI Practice', icon: MessageCircle },
     { path: '/trainer', label: 'Trainer Mode', icon: Users },
     { path: '/learn', label: 'Learn Mode', icon: BookOpen },
     { path: '/quiz', label: 'Quiz Mode', icon: Brain }

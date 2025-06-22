@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Target, BookOpen } from 'lucide-react';
+import { ArrowRight, Target, BookOpen, MessageCircle } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function Home() {
@@ -17,24 +17,25 @@ export default function Home() {
           <div className="flex flex-col gap-4">
             <button
               className="btn-primary flex items-center justify-center space-x-2 w-full"
-              onClick={() => navigate('/practice')}
+              onClick={() => navigate('/ai-practice')}
             >
-              <span>Start Practice</span>
+              <MessageCircle className="w-5 h-5" />
+              <span>AI Practice Mode</span>
               <ArrowRight className="w-5 h-5" />
             </button>
             <button
               className="btn-secondary flex items-center justify-center space-x-2 w-full"
+              onClick={() => navigate('/practice')}
+            >
+              <Target className="w-5 h-5" />
+              <span>Practice Mode</span>
+            </button>
+            <button
+              className="btn-outline flex items-center justify-center space-x-2 w-full"
               onClick={() => navigate('/learn')}
             >
               <BookOpen className="w-5 h-5" />
               <span>Learn About SFBT</span>
-            </button>
-            <button
-              className="btn-outline flex items-center justify-center space-x-2 w-full"
-              onClick={() => navigate('/trainer')}
-            >
-              <Target className="w-5 h-5" />
-              <span>Trainer Mode</span>
             </button>
           </div>
         </div>

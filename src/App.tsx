@@ -4,6 +4,7 @@ import Navigation from './components/Navigation'
 import Home from './pages/Home'
 import Onboarding from './pages/Onboarding'
 import PracticeMode from './pages/PracticeMode'
+import AIPracticeMode from './pages/AIPracticeMode'
 import TrainerMode from './pages/TrainerMode'
 import LearnMode from './pages/LearnMode'
 import QuizMode from './pages/QuizMode'
@@ -30,6 +31,7 @@ function App() {
               <PracticeMode />
             </main>
           } />
+          <Route path="/ai-practice" element={<AIPracticeMode />} />
           <Route path="/trainer" element={
             <main className="container mx-auto px-4 py-8">
               <TrainerMode />
