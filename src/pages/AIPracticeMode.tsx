@@ -20,7 +20,6 @@ interface PracticeSettings {
 }
 
 export default function AIPracticeMode() {
-  const { userProfile } = useAppContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +69,6 @@ export default function AIPracticeMode() {
 
   const startSession = async () => {
     setIsLoading(true);
-    const prompt = generateSessionPrompt();
     
     // Simulate AI response (replace with actual ChatGPT API call)
     setTimeout(() => {
