@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, ArrowRight, Sparkles, BookOpen, Target } from 'lucide-react'
+import { ArrowRight, Sparkles, BookOpen, Target } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import Logo from '../components/Logo'
 
