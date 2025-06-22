@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, MessageCircle, RefreshCw, Settings, Lightbulb, Target, ArrowUp, ArrowDown } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
 
 interface Message {
   id: string;
@@ -57,15 +56,6 @@ export default function AIPracticeMode() {
     { value: 'confidence', label: 'Building Confidence' },
     { value: 'pain', label: 'Pain Management' }
   ];
-
-  const generateSessionPrompt = () => {
-    const themeText = themes.find(t => t.value === settings.theme)?.label || 'health and wellness';
-    const feedbackInstruction = settings.feedbackMode === 'immediate' 
-      ? 'After each of my questions, give me brief feedback: Was that above or below the line? How could I make it more effective?'
-      : 'At the end of our conversation, give me brief feedback: Was that above or below the line? How could I make it more effective?';
-
-    return `I am a student health coach practicing Solution-Focused coaching using the Dialogic Orientation Quadrant (DOQ). Please act as my client and choose an issue related to ${themeText} for me to help you with. Respond with a mix of problem- and resource-talk each time you speak so I can practice "staying above the line." ${feedbackInstruction}`;
-  };
 
   const startSession = async () => {
     setIsLoading(true);
