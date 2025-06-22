@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, ArrowRight, Sparkles, BookOpen, Target } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import Logo from '../components/Logo'
 
 export default function Onboarding() {
   const navigate = useNavigate()
@@ -22,8 +23,8 @@ export default function Onboarding() {
       subtitle: "Let's get to know you better to personalize your learning experience",
       content: (
         <div className="text-center space-y-6">
-          <div className="w-20 h-20 bg-[#D5EDF0] rounded-full flex items-center justify-center mx-auto">
-            <Heart className="w-10 h-10 text-[#2F5169]" />
+          <div className="flex justify-center">
+            <Logo size="md" />
           </div>
           <div>
             <h2 className="text-2xl font-bold text-[#2F5169] mb-2">Welcome!</h2>
@@ -142,10 +143,8 @@ export default function Onboarding() {
         <div className="w-full max-w-lg">
           <div className="card text-center space-y-8">
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-20 h-20 bg-[#2F5169] rounded-full flex items-center justify-center mx-auto">
-                <Heart className="w-10 h-10 text-white" />
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#2F5169]">Welcome to Stamina Lab Coach Trainer</h1>
+              <Logo size="lg" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#2F5169]">Coach Trainer</h1>
               <p className="text-gray-700 text-lg">Get started on your solution-focused coaching journey. Choose an action below:</p>
             </div>
             <div className="flex flex-col gap-4">

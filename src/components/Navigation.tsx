@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Home, Users, BookOpen, Target, Brain } from 'lucide-react'
+import Logo from './Logo'
 
 export default function Navigation() {
   const location = useLocation()
@@ -29,14 +30,9 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-              <div className="w-8 h-8 bg-[#2F5169] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SL</span>
-              </div>
-              <span className="text-xl font-bold text-[#2F5169] hidden sm:block">
-                Stamina Lab Coach
-              </span>
-              <span className="text-xl font-bold text-[#2F5169] sm:hidden">
-                SL Coach
+              <Logo size="sm" />
+              <span className="text-lg font-semibold text-[#2F5169] hidden sm:block">
+                Coach Trainer
               </span>
             </Link>
           </div>
