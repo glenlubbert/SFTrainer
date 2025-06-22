@@ -21,15 +21,29 @@ function App() {
     <AppContext.Provider value={{ isTrainerMode, setIsTrainerMode, userProfile, setUserProfile }}>
       <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <main className="container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<Onboarding />} />
-            <Route path="/practice" element={<PracticeMode />} />
-            <Route path="/trainer" element={<TrainerMode />} />
-            <Route path="/learn" element={<LearnMode />} />
-            <Route path="/quiz" element={<QuizMode />} />
-          </Routes>
-        </main>
+        <Routes>
+          <Route path="/" element={<Onboarding />} />
+          <Route path="/practice" element={
+            <main className="container mx-auto px-4 py-8">
+              <PracticeMode />
+            </main>
+          } />
+          <Route path="/trainer" element={
+            <main className="container mx-auto px-4 py-8">
+              <TrainerMode />
+            </main>
+          } />
+          <Route path="/learn" element={
+            <main className="container mx-auto px-4 py-8">
+              <LearnMode />
+            </main>
+          } />
+          <Route path="/quiz" element={
+            <main className="container mx-auto px-4 py-8">
+              <QuizMode />
+            </main>
+          } />
+        </Routes>
       </div>
     </AppContext.Provider>
   )

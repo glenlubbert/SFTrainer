@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, ArrowRight, Sparkles } from 'lucide-react'
+import { Heart, ArrowRight, Sparkles, BookOpen, Target } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 
 export default function Onboarding() {
   const navigate = useNavigate()
   const { setUserProfile } = useAppContext()
   const [currentStep, setCurrentStep] = useState(0)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     background: '',
@@ -132,6 +133,48 @@ export default function Onboarding() {
     if (currentStep === 3) return formData.goals.trim() !== ''
     if (currentStep === 4) return formData.preferredLearningStyle !== ''
     return false
+  }
+
+  // New: Welcome/choice screen
+  if (!showOnboarding && currentStep === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#D5EDF0] to-[#b8e0e5] flex items-center justify-center p-4">
+        <div className="w-full max-w-lg">
+          <div className="card text-center space-y-8">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-20 h-20 bg-[#2F5169] rounded-full flex items-center justify-center mx-auto">
+                <Heart className="w-10 h-10 text-white" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#2F5169]">Welcome to Stamina Lab Coach Trainer</h1>
+              <p className="text-gray-700 text-lg">Get started on your solution-focused coaching journey. Choose an action below:</p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <button
+                className="btn-primary flex items-center justify-center space-x-2 w-full"
+                onClick={() => setShowOnboarding(true)}
+              >
+                <span>Start Onboarding</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <button
+                className="btn-secondary flex items-center justify-center space-x-2 w-full"
+                onClick={() => navigate('/practice')}
+              >
+                <Target className="w-5 h-5" />
+                <span>Jump to Practice</span>
+              </button>
+              <button
+                className="btn-outline flex items-center justify-center space-x-2 w-full"
+                onClick={() => navigate('/learn')}
+              >
+                <BookOpen className="w-5 h-5" />
+                <span>Learn About SFBT</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
