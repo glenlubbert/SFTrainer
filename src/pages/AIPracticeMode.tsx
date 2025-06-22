@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, MessageCircle, RefreshCw, Settings, Lightbulb, Target, ArrowUp, ArrowDown, AlertCircle, CheckCircle } from 'lucide-react';
-import { generateInitialClientResponse, generateClientResponse, analyzeCoachQuestion } from '../services/openaiService';
+import { generateInitialClientResponse, generateClientResponse } from '../services/openaiService';
 import { isOpenAIConfigured, getConfigStatus } from '../config/openai';
 
 interface Message {
@@ -37,7 +37,7 @@ export default function AIPracticeMode() {
     aboveLineCount: 0,
     belowLineCount: 0
   });
-  const [apiStatus, setApiStatus] = useState(getConfigStatus());
+  const [apiStatus] = useState(getConfigStatus());
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -161,20 +161,20 @@ export default function AIPracticeMode() {
 
   // API Configuration Instructions Component
   const APIConfigInstructions = () => (
-    <div className="card mb-6 border-2 border-[#EB5931] bg-[#F5AC3A]/10">
+    <div className="card mb-4 sm:mb-6 border-2 border-[#EB5931] bg-[#F5AC3A]/10">
       <div className="flex items-start gap-3">
-        <AlertCircle className="w-6 h-6 text-[#EB5931] mt-1 flex-shrink-0" />
+        <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#EB5931] mt-1 flex-shrink-0" />
         <div>
-          <h3 className="text-lg font-semibold text-[#2F5169] mb-2">OpenAI API Setup Required</h3>
-          <p className="text-gray-700 mb-3">
+          <h3 className="text-base sm:text-lg font-semibold text-[#2F5169] mb-2">OpenAI API Setup Required</h3>
+          <p className="text-sm text-gray-700 mb-3">
             To use the AI Practice Mode, you need to configure your OpenAI API key.
           </p>
-          <div className="bg-gray-100 p-3 rounded-lg text-sm font-mono mb-3">
+          <div className="bg-gray-100 p-3 rounded-lg text-xs sm:text-sm font-mono mb-3">
             <p className="mb-2">1. Create a file called <code>.env.local</code> in your project root</p>
             <p className="mb-2">2. Add your OpenAI API key:</p>
-            <p className="text-[#2F5169]">VITE_OPENAI_API_KEY=your_actual_api_key_here</p>
+            <p className="text-[#2F5169] break-all">VITE_OPENAI_API_KEY=your_actual_api_key_here</p>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-xs sm:text-sm text-gray-600 space-y-1">
             <p>• Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[#2F5169] underline">OpenAI Platform</a></p>
             <p>• Restart your development server after adding the key</p>
             <p>• The API key is only used locally and never sent to our servers</p>
@@ -185,32 +185,32 @@ export default function AIPracticeMode() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#D5EDF0] to-[#b8e0e5] p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#D5EDF0] to-[#b8e0e5] p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="card mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="card mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-[#2F5169] flex items-center gap-2">
-                <MessageCircle className="w-6 h-6" />
+              <h1 className="text-xl sm:text-2xl font-bold text-[#2F5169] flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                 AI Practice Mode
               </h1>
-              <p className="text-gray-600">Practice Solution-Focused coaching with AI-powered role-play</p>
+              <p className="text-sm sm:text-base text-gray-600">Practice Solution-Focused coaching with AI-powered role-play</p>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="btn-secondary flex items-center gap-2"
+                className="btn-secondary flex items-center gap-2 px-3 py-2 text-sm"
               >
                 <Settings className="w-4 h-4" />
-                Settings
+                <span className="hidden sm:inline">Settings</span>
               </button>
               <button
                 onClick={resetSession}
-                className="btn-secondary flex items-center gap-2"
+                className="btn-secondary flex items-center gap-2 px-3 py-2 text-sm"
               >
                 <RefreshCw className="w-4 h-4" />
-                Reset
+                <span className="hidden sm:inline">Reset</span>
               </button>
             </div>
           </div>
@@ -219,23 +219,23 @@ export default function AIPracticeMode() {
           {!apiStatus.configured && <APIConfigInstructions />}
           
           {apiStatus.configured && (
-            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded-lg">
-              <CheckCircle className="w-4 h-4" />
-              {apiStatus.message}
+            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-lg">
+              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              <span className="text-xs sm:text-sm">{apiStatus.message}</span>
             </div>
           )}
 
           {/* Settings Panel */}
           {showSettings && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-semibold text-[#2F5169] mb-3">Practice Settings</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mt-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-semibold text-[#2F5169] mb-3 text-sm sm:text-base">Practice Settings</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Theme</label>
                   <select
                     value={settings.theme}
                     onChange={(e) => setSettings(prev => ({ ...prev, theme: e.target.value }))}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent text-sm"
                   >
                     {themes.map(theme => (
                       <option key={theme.value} value={theme.value}>{theme.label}</option>
@@ -247,19 +247,19 @@ export default function AIPracticeMode() {
                   <select
                     value={settings.difficulty}
                     onChange={(e) => setSettings(prev => ({ ...prev, difficulty: e.target.value as any }))}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent text-sm"
                   >
                     <option value="beginner">Beginner</option>
                     <option value="intermediate">Intermediate</option>
                     <option value="advanced">Advanced</option>
                   </select>
                 </div>
-                <div>
+                <div className="sm:col-span-2 lg:col-span-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Mode</label>
                   <select
                     value={settings.feedbackMode}
                     onChange={(e) => setSettings(prev => ({ ...prev, feedbackMode: e.target.value as any }))}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent text-sm"
                   >
                     <option value="immediate">Immediate</option>
                     <option value="end">End of Session</option>
@@ -272,48 +272,48 @@ export default function AIPracticeMode() {
 
         {/* Session Stats */}
         {sessionStarted && (
-          <div className="card mb-6">
-            <h3 className="font-semibold text-[#2F5169] mb-3 flex items-center gap-2">
-              <Target className="w-5 h-5" />
+          <div className="card mb-4 sm:mb-6">
+            <h3 className="font-semibold text-[#2F5169] mb-3 flex items-center gap-2 text-sm sm:text-base">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
               Session Statistics
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-[#2F5169]">{sessionStats.totalQuestions}</div>
-                <div className="text-sm text-gray-600">Total Questions</div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <div className="text-center p-2 sm:p-3 bg-blue-50 rounded-lg">
+                <div className="text-lg sm:text-2xl font-bold text-[#2F5169]">{sessionStats.totalQuestions}</div>
+                <div className="text-xs sm:text-sm text-gray-600">Total</div>
               </div>
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600 flex items-center justify-center gap-1">
-                  <ArrowUp className="w-5 h-5" />
+              <div className="text-center p-2 sm:p-3 bg-green-50 rounded-lg">
+                <div className="text-lg sm:text-2xl font-bold text-green-600 flex items-center justify-center gap-1">
+                  <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
                   {sessionStats.aboveLineCount}
                 </div>
-                <div className="text-sm text-gray-600">Above the Line</div>
+                <div className="text-xs sm:text-sm text-gray-600">Above</div>
               </div>
-              <div className="text-center p-3 bg-red-50 rounded-lg">
-                <div className="text-2xl font-bold text-red-600 flex items-center justify-center gap-1">
-                  <ArrowDown className="w-5 h-5" />
+              <div className="text-center p-2 sm:p-3 bg-red-50 rounded-lg">
+                <div className="text-lg sm:text-2xl font-bold text-red-600 flex items-center justify-center gap-1">
+                  <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5" />
                   {sessionStats.belowLineCount}
                 </div>
-                <div className="text-sm text-gray-600">Below the Line</div>
+                <div className="text-xs sm:text-sm text-gray-600">Below</div>
               </div>
             </div>
           </div>
         )}
 
         {/* Chat Interface */}
-        <div className="card flex-1">
+        <div className="card flex-1 min-h-[60vh] sm:min-h-[70vh] flex flex-col">
           {!sessionStarted ? (
-            <div className="text-center py-12">
+            <div className="text-center py-8 sm:py-12 flex-1 flex items-center justify-center">
               <div className="mb-6">
-                <MessageCircle className="w-16 h-16 text-[#2F5169] mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-[#2F5169] mb-2">Ready to Practice?</h2>
-                <p className="text-gray-600 mb-6">
+                <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 text-[#2F5169] mx-auto mb-4" />
+                <h2 className="text-lg sm:text-xl font-semibold text-[#2F5169] mb-2">Ready to Practice?</h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-6 px-4">
                   Start a coaching session with an AI client. Practice your solution-focused questions and get real-time feedback.
                 </p>
                 <button
                   onClick={startSession}
                   disabled={!apiStatus.configured || isLoading}
-                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 text-sm sm:text-base"
                 >
                   {isLoading ? 'Starting Session...' : 'Start Session'}
                 </button>
@@ -322,17 +322,17 @@ export default function AIPracticeMode() {
           ) : (
             <>
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto max-h-96 mb-4">
+              <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3">
                 {messages.map((message) => (
-                  <div key={message.id} className="mb-4">
+                  <div key={message.id} className="space-y-2">
                     <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-lg ${
+                      <div className={`max-w-[85%] sm:max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-lg ${
                         message.role === 'user' 
                           ? 'bg-[#2F5169] text-white' 
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">
+                        <p className="text-sm sm:text-base leading-relaxed">{message.content}</p>
+                        <p className="text-xs opacity-70 mt-2">
                           {message.timestamp.toLocaleTimeString()}
                         </p>
                       </div>
@@ -340,7 +340,7 @@ export default function AIPracticeMode() {
                     
                     {/* Feedback */}
                     {message.feedback && (
-                      <div className={`mt-2 p-3 rounded-lg ${
+                      <div className={`mx-2 sm:mx-0 p-3 rounded-lg ${
                         message.feedback.aboveLine 
                           ? 'bg-green-50 border border-green-200' 
                           : 'bg-red-50 border border-red-200'
@@ -351,14 +351,14 @@ export default function AIPracticeMode() {
                           ) : (
                             <ArrowDown className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
                           )}
-                          <div>
+                          <div className="flex-1">
                             <p className={`text-sm font-medium ${
                               message.feedback.aboveLine ? 'text-green-800' : 'text-red-800'
                             }`}>
                               {message.feedback.aboveLine ? 'Above the Line' : 'Below the Line'}
-                              {message.feedback.score && ` (Score: ${message.feedback.score}/10)`}
+                              {message.feedback.score && ` (${message.feedback.score}/10)`}
                             </p>
-                            <p className="text-sm text-gray-700 mt-1">{message.feedback.suggestion}</p>
+                            <p className="text-xs sm:text-sm text-gray-700 mt-1 leading-relaxed">{message.feedback.suggestion}</p>
                           </div>
                         </div>
                       </div>
@@ -369,40 +369,45 @@ export default function AIPracticeMode() {
               </div>
 
               {/* Input */}
-              <div className="flex gap-2">
-                <textarea
-                  ref={inputRef}
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask your solution-focused question..."
-                  className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
-                  rows={2}
-                  disabled={isLoading}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="btn-primary px-4 self-end disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                </button>
+              <div className="border-t p-3 sm:p-4">
+                <div className="flex gap-2 items-end">
+                  <textarea
+                    ref={inputRef}
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask your solution-focused question..."
+                    className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-[#2F5169] focus:border-transparent text-sm sm:text-base"
+                    rows={2}
+                    disabled={isLoading}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!inputMessage.trim() || isLoading}
+                    className="btn-primary px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                  >
+                    {isLoading ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Press Enter to send, Shift+Enter for new line
+                </p>
               </div>
             </>
           )}
         </div>
 
         {/* DOQ Guidelines */}
-        <div className="card mt-6">
-          <h3 className="font-semibold text-[#2F5169] mb-3 flex items-center gap-2">
-            <Lightbulb className="w-5 h-5" />
+        <div className="card mt-4 sm:mt-6">
+          <h3 className="font-semibold text-[#2F5169] mb-3 flex items-center gap-2 text-sm sm:text-base">
+            <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
             Dialogic Orientation Quadrant (DOQ) Guidelines
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
             <div>
               <h4 className="font-medium text-green-700 mb-2">Above the Line (Solution-Focused)</h4>
               <ul className="space-y-1 text-gray-700">
