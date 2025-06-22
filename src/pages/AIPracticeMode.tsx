@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, RefreshCw, Settings, Lightbulb, Target, ArrowUp, ArrowDown } from 'lucide-react';
+import { Send, MessageCircle, RefreshCw, Settings, Lightbulb, Target, ArrowUp, ArrowDown, AlertCircle, CheckCircle } from 'lucide-react';
+import { generateInitialClientResponse, generateClientResponse, analyzeCoachQuestion } from '../services/openaiService';
+import { isOpenAIConfigured, getConfigStatus } from '../config/openai';
 
 interface Message {
   id: string;
@@ -9,6 +11,7 @@ interface Message {
   feedback?: {
     aboveLine: boolean;
     suggestion: string;
+    score?: number;
   };
 }
 
@@ -34,6 +37,7 @@ export default function AIPracticeMode() {
     aboveLineCount: 0,
     belowLineCount: 0
   });
+  const [apiStatus, setApiStatus] = useState(getConfigStatus());
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -58,11 +62,15 @@ export default function AIPracticeMode() {
   ];
 
   const startSession = async () => {
+    if (!isOpenAIConfigured()) {
+      alert('Please configure your OpenAI API key first. See the setup instructions below.');
+      return;
+    }
+
     setIsLoading(true);
     
-    // Simulate AI response (replace with actual ChatGPT API call)
-    setTimeout(() => {
-      const clientResponse = generateClientResponse(settings.theme, settings.difficulty);
+    try {
+      const clientResponse = await generateInitialClientResponse(settings.theme, settings.difficulty);
       const newMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
@@ -72,31 +80,12 @@ export default function AIPracticeMode() {
       
       setMessages([newMessage]);
       setSessionStarted(true);
+    } catch (error) {
+      console.error('Error starting session:', error);
+      alert('Failed to start session. Please check your API key and try again.');
+    } finally {
       setIsLoading(false);
-    }, 1500);
-  };
-
-  const generateClientResponse = (theme: string, difficulty: string): string => {
-    const responses = {
-      nutrition: {
-        beginner: "I've been trying to eat healthier, but I keep falling back into old habits. I know I should be eating more vegetables, but I just don't have the time to cook, and when I do try, it doesn't taste very good. I used to be really good at meal planning, but that was years ago. I'm just feeling overwhelmed by all the conflicting advice out there.",
-        intermediate: "I'm struggling with emotional eating, especially in the evenings. I can do well during the day, but when I get home from work, I just want comfort food. I've tried different diets before, and I know what works for me when I'm in the right mindset. But right now, I feel like I'm stuck in this cycle.",
-        advanced: "I'm dealing with some digestive issues that make healthy eating complicated. I've been working with a nutritionist, but I'm finding it hard to balance their recommendations with my busy schedule and family preferences. I have some strategies that work when I'm feeling well, but stress seems to trigger both my symptoms and my old eating patterns."
-      },
-      exercise: {
-        beginner: "I want to get more active, but I'm not sure where to start. I used to enjoy walking, but I've been so busy with work that I haven't made time for it. I know exercise is important, but I feel like I need to do something intense to see results, and that's intimidating.",
-        intermediate: "I'm trying to build a consistent exercise routine, but I keep getting injured or burning out. I love the feeling when I'm active regularly, and I know I have more energy and better sleep. But I tend to go too hard and then have to stop completely.",
-        advanced: "I'm training for a specific goal, but I'm hitting plateaus and dealing with some performance anxiety. I have a good foundation of fitness habits, but I'm struggling to balance pushing myself with listening to my body. I know what works for me when I'm in the right headspace."
-      },
-      stress: {
-        beginner: "I'm feeling really stressed lately, and I don't know how to manage it. Everything feels overwhelming, and I'm not sleeping well. I used to be better at handling stress, but lately, it's just getting to me.",
-        intermediate: "I'm dealing with chronic stress from work, and it's affecting my relationships and health. I have some coping strategies that work sometimes, but I feel like I'm constantly playing catch-up. I know I need to set better boundaries.",
-        advanced: "I'm experiencing burnout symptoms and need to rebuild my stress management toolkit. I have a good understanding of what triggers my stress and some effective strategies, but I'm struggling to implement them consistently in my current situation."
-      }
-    };
-
-    const themeResponses = responses[theme as keyof typeof responses] || responses.stress;
-    return themeResponses[difficulty as keyof typeof themeResponses] || themeResponses.beginner;
+    }
   };
 
   const sendMessage = async () => {
@@ -113,59 +102,48 @@ export default function AIPracticeMode() {
     setInputMessage('');
     setIsLoading(true);
 
-    // Simulate AI response with feedback
-    setTimeout(() => {
-      const feedback = analyzeQuestion(inputMessage);
-      const clientResponse = generateClientResponse(settings.theme, settings.difficulty);
+    try {
+      // Create session context for the API
+      const sessionContext = {
+        theme: settings.theme,
+        difficulty: settings.difficulty,
+        messages: messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      };
+
+      const response = await generateClientResponse(sessionContext, inputMessage);
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: clientResponse,
+        content: response.content,
         timestamp: new Date(),
-        feedback: settings.feedbackMode === 'immediate' ? feedback : undefined
+        feedback: settings.feedbackMode === 'immediate' ? {
+          aboveLine: response.feedback?.aboveLine || false,
+          suggestion: response.feedback?.suggestion || '',
+          score: response.feedback?.score
+        } : undefined
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
       
       // Update stats
-      setSessionStats(prev => ({
-        ...prev,
-        totalQuestions: prev.totalQuestions + 1,
-        aboveLineCount: prev.aboveLineCount + (feedback.aboveLine ? 1 : 0),
-        belowLineCount: prev.belowLineCount + (feedback.aboveLine ? 0 : 1)
-      }));
-    }, 1500);
-  };
-
-  const analyzeQuestion = (question: string): { aboveLine: boolean; suggestion: string } => {
-    const aboveLineKeywords = [
-      'hope', 'better', 'different', 'notice', 'working', 'helpful', 'improve',
-      'progress', 'success', 'achieved', 'managed', 'handled', 'learned',
-      'strategies', 'resources', 'support', 'strengths', 'capabilities'
-    ];
-
-    const belowLineKeywords = [
-      'problem', 'issue', 'struggle', 'difficult', 'hard', 'bad', 'wrong',
-      'fix', 'solve', 'cure', 'treatment', 'therapy', 'diagnosis',
-      'feel', 'emotion', 'upset', 'angry', 'sad', 'depressed'
-    ];
-
-    const questionLower = question.toLowerCase();
-    const aboveLineScore = aboveLineKeywords.filter(keyword => questionLower.includes(keyword)).length;
-    const belowLineScore = belowLineKeywords.filter(keyword => questionLower.includes(keyword)).length;
-
-    const isAboveLine = aboveLineScore > belowLineScore;
-    
-    let suggestion = '';
-    if (isAboveLine) {
-      suggestion = 'Great! This question stays above the line by focusing on possibilities and resources.';
-    } else {
-      suggestion = 'Consider reframing to focus on what\'s working, what will be different, or what the client will notice in the better future.';
+      if (response.feedback) {
+        setSessionStats(prev => ({
+          ...prev,
+          totalQuestions: prev.totalQuestions + 1,
+          aboveLineCount: prev.aboveLineCount + (response.feedback?.aboveLine ? 1 : 0),
+          belowLineCount: prev.belowLineCount + (response.feedback?.aboveLine ? 0 : 1)
+        }));
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to get response. Please check your API key and try again.');
+    } finally {
+      setIsLoading(false);
     }
-
-    return { aboveLine: isAboveLine, suggestion };
   };
 
   const resetSession = () => {
@@ -180,6 +158,31 @@ export default function AIPracticeMode() {
       sendMessage();
     }
   };
+
+  // API Configuration Instructions Component
+  const APIConfigInstructions = () => (
+    <div className="card mb-6 border-2 border-[#EB5931] bg-[#F5AC3A]/10">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="w-6 h-6 text-[#EB5931] mt-1 flex-shrink-0" />
+        <div>
+          <h3 className="text-lg font-semibold text-[#2F5169] mb-2">OpenAI API Setup Required</h3>
+          <p className="text-gray-700 mb-3">
+            To use the AI Practice Mode, you need to configure your OpenAI API key.
+          </p>
+          <div className="bg-gray-100 p-3 rounded-lg text-sm font-mono mb-3">
+            <p className="mb-2">1. Create a file called <code>.env.local</code> in your project root</p>
+            <p className="mb-2">2. Add your OpenAI API key:</p>
+            <p className="text-[#2F5169]">VITE_OPENAI_API_KEY=your_actual_api_key_here</p>
+          </div>
+          <div className="text-sm text-gray-600">
+            <p>• Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[#2F5169] underline">OpenAI Platform</a></p>
+            <p>• Restart your development server after adding the key</p>
+            <p>• The API key is only used locally and never sent to our servers</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D5EDF0] to-[#b8e0e5] p-4">
@@ -204,7 +207,7 @@ export default function AIPracticeMode() {
               </button>
               <button
                 onClick={resetSession}
-                className="btn-outline flex items-center gap-2"
+                className="btn-secondary flex items-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
                 Reset
@@ -212,226 +215,212 @@ export default function AIPracticeMode() {
             </div>
           </div>
 
+          {/* API Status */}
+          {!apiStatus.configured && <APIConfigInstructions />}
+          
+          {apiStatus.configured && (
+            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded-lg">
+              <CheckCircle className="w-4 h-4" />
+              {apiStatus.message}
+            </div>
+          )}
+
           {/* Settings Panel */}
           {showSettings && (
-            <div className="border-t pt-4 space-y-4">
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-semibold text-[#2F5169] mb-3">Practice Settings</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Practice Theme
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Theme</label>
                   <select
                     value={settings.theme}
                     onChange={(e) => setSettings(prev => ({ ...prev, theme: e.target.value }))}
-                    className="input-field"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
                   >
                     {themes.map(theme => (
-                      <option key={theme.value} value={theme.value}>
-                        {theme.label}
-                      </option>
+                      <option key={theme.value} value={theme.value}>{theme.label}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Feedback Mode
-                  </label>
-                  <select
-                    value={settings.feedbackMode}
-                    onChange={(e) => setSettings(prev => ({ ...prev, feedbackMode: e.target.value as 'immediate' | 'end' }))}
-                    className="input-field"
-                  >
-                    <option value="immediate">Immediate Feedback</option>
-                    <option value="end">End of Session</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Difficulty Level
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
                   <select
                     value={settings.difficulty}
-                    onChange={(e) => setSettings(prev => ({ ...prev, difficulty: e.target.value as 'beginner' | 'intermediate' | 'advanced' }))}
-                    className="input-field"
+                    onChange={(e) => setSettings(prev => ({ ...prev, difficulty: e.target.value as any }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
                   >
                     <option value="beginner">Beginner</option>
                     <option value="intermediate">Intermediate</option>
                     <option value="advanced">Advanced</option>
                   </select>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Session Stats */}
-          {sessionStarted && (
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1">
-                    <Target className="w-4 h-4" />
-                    Questions: {sessionStats.totalQuestions}
-                  </span>
-                  <span className="flex items-center gap-1 text-green-600">
-                    <ArrowUp className="w-4 h-4" />
-                    Above Line: {sessionStats.aboveLineCount}
-                  </span>
-                  <span className="flex items-center gap-1 text-red-600">
-                    <ArrowDown className="w-4 h-4" />
-                    Below Line: {sessionStats.belowLineCount}
-                  </span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Mode</label>
+                  <select
+                    value={settings.feedbackMode}
+                    onChange={(e) => setSettings(prev => ({ ...prev, feedbackMode: e.target.value as any }))}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
+                  >
+                    <option value="immediate">Immediate</option>
+                    <option value="end">End of Session</option>
+                  </select>
                 </div>
-                {sessionStats.totalQuestions > 0 && (
-                  <span className="text-sm text-gray-600">
-                    {Math.round((sessionStats.aboveLineCount / sessionStats.totalQuestions) * 100)}% Above Line
-                  </span>
-                )}
               </div>
             </div>
           )}
         </div>
 
+        {/* Session Stats */}
+        {sessionStarted && (
+          <div className="card mb-6">
+            <h3 className="font-semibold text-[#2F5169] mb-3 flex items-center gap-2">
+              <Target className="w-5 h-5" />
+              Session Statistics
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-[#2F5169]">{sessionStats.totalQuestions}</div>
+                <div className="text-sm text-gray-600">Total Questions</div>
+              </div>
+              <div className="text-center p-3 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600 flex items-center justify-center gap-1">
+                  <ArrowUp className="w-5 h-5" />
+                  {sessionStats.aboveLineCount}
+                </div>
+                <div className="text-sm text-gray-600">Above the Line</div>
+              </div>
+              <div className="text-center p-3 bg-red-50 rounded-lg">
+                <div className="text-2xl font-bold text-red-600 flex items-center justify-center gap-1">
+                  <ArrowDown className="w-5 h-5" />
+                  {sessionStats.belowLineCount}
+                </div>
+                <div className="text-sm text-gray-600">Below the Line</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Chat Interface */}
-        <div className="card h-96 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {!sessionStarted ? (
-              <div className="text-center py-8">
-                <Lightbulb className="w-12 h-12 text-[#F5AC3A] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-[#2F5169] mb-2">
-                  Ready to Practice?
-                </h3>
+        <div className="card flex-1">
+          {!sessionStarted ? (
+            <div className="text-center py-12">
+              <div className="mb-6">
+                <MessageCircle className="w-16 h-16 text-[#2F5169] mx-auto mb-4" />
+                <h2 className="text-xl font-semibold text-[#2F5169] mb-2">Ready to Practice?</h2>
                 <p className="text-gray-600 mb-6">
-                  Start a coaching session with an AI client. Focus on staying "above the line" 
-                  with solution-focused questions.
+                  Start a coaching session with an AI client. Practice your solution-focused questions and get real-time feedback.
                 </p>
                 <button
                   onClick={startSession}
-                  disabled={isLoading}
-                  className="btn-primary flex items-center gap-2 mx-auto"
+                  disabled={!apiStatus.configured || isLoading}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      Starting Session...
-                    </>
-                  ) : (
-                    <>
-                      <MessageCircle className="w-4 h-4" />
-                      Start Session
-                    </>
-                  )}
+                  {isLoading ? 'Starting Session...' : 'Start Session'}
                 </button>
               </div>
-            ) : (
-              <>
+            </div>
+          ) : (
+            <>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto max-h-96 mb-4">
                 {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.role === 'user'
-                          ? 'bg-[#2F5169] text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      {message.feedback && (
-                        <div className={`mt-2 p-2 rounded text-xs ${
-                          message.feedback.aboveLine 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          <div className="flex items-center gap-1 mb-1">
-                            {message.feedback.aboveLine ? (
-                              <ArrowUp className="w-3 h-3" />
-                            ) : (
-                              <ArrowDown className="w-3 h-3" />
-                            )}
-                            <span className="font-medium">
-                              {message.feedback.aboveLine ? 'Above Line' : 'Below Line'}
-                            </span>
-                          </div>
-                          <p>{message.feedback.suggestion}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Client is typing...</span>
+                  <div key={message.id} className="mb-4">
+                    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs md:max-w-md lg:max-w-lg p-3 rounded-lg ${
+                        message.role === 'user' 
+                          ? 'bg-[#2F5169] text-white' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        <p className="text-sm">{message.content}</p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
                       </div>
                     </div>
+                    
+                    {/* Feedback */}
+                    {message.feedback && (
+                      <div className={`mt-2 p-3 rounded-lg ${
+                        message.feedback.aboveLine 
+                          ? 'bg-green-50 border border-green-200' 
+                          : 'bg-red-50 border border-red-200'
+                      }`}>
+                        <div className="flex items-start gap-2">
+                          {message.feedback.aboveLine ? (
+                            <ArrowUp className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          ) : (
+                            <ArrowDown className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                          )}
+                          <div>
+                            <p className={`text-sm font-medium ${
+                              message.feedback.aboveLine ? 'text-green-800' : 'text-red-800'
+                            }`}>
+                              {message.feedback.aboveLine ? 'Above the Line' : 'Below the Line'}
+                              {message.feedback.score && ` (Score: ${message.feedback.score}/10)`}
+                            </p>
+                            <p className="text-sm text-gray-700 mt-1">{message.feedback.suggestion}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
 
-          {/* Input Area */}
-          {sessionStarted && (
-            <div className="border-t p-4">
+              {/* Input */}
               <div className="flex gap-2">
                 <textarea
                   ref={inputRef}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask your coaching question..."
-                  className="flex-1 input-field resize-none"
+                  placeholder="Ask your solution-focused question..."
+                  className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-[#2F5169] focus:border-transparent"
                   rows={2}
                   disabled={isLoading}
                 />
                 <button
                   onClick={sendMessage}
                   disabled={!inputMessage.trim() || isLoading}
-                  className="btn-primary px-4 self-end"
+                  className="btn-primary px-4 self-end disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-4 h-4" />
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5" />
+                  )}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Press Enter to send, Shift+Enter for new line
-              </p>
-            </div>
+            </>
           )}
         </div>
 
         {/* DOQ Guidelines */}
         <div className="card mt-6">
-          <h3 className="text-lg font-semibold text-[#2F5169] mb-4 flex items-center gap-2">
+          <h3 className="font-semibold text-[#2F5169] mb-3 flex items-center gap-2">
             <Lightbulb className="w-5 h-5" />
             Dialogic Orientation Quadrant (DOQ) Guidelines
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <h4 className="font-medium text-green-700 mb-2 flex items-center gap-1">
-                <ArrowUp className="w-4 h-4" />
-                Above the Line (Solution-Focused)
-              </h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• "What will you notice that tells you things are getting better?"</li>
-                <li>• "When has this been less of a struggle for you?"</li>
-                <li>• "What strategies have worked for you before?"</li>
-                <li>• "How will you know this approach is working?"</li>
+              <h4 className="font-medium text-green-700 mb-2">Above the Line (Solution-Focused)</h4>
+              <ul className="space-y-1 text-gray-700">
+                <li>• Focus on what's working</li>
+                <li>• Ask about exceptions to the problem</li>
+                <li>• Explore the preferred future</li>
+                <li>• Use scaling questions</li>
+                <li>• Ask "what else?" to expand possibilities</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-red-700 mb-2 flex items-center gap-1">
-                <ArrowDown className="w-4 h-4" />
-                Below the Line (Problem-Focused)
-              </h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• "What's causing this problem?"</li>
-                <li>• "How does that make you feel?"</li>
-                <li>• "Why do you think this is happening?"</li>
-                <li>• "What's wrong with your current approach?"</li>
+              <h4 className="font-medium text-red-700 mb-2">Below the Line (Problem-Focused)</h4>
+              <ul className="space-y-1 text-gray-700">
+                <li>• Focusing on problems and causes</li>
+                <li>• Asking "why" questions</li>
+                <li>• Exploring feelings extensively</li>
+                <li>• Giving advice or solutions</li>
+                <li>• Diagnosing or labeling</li>
               </ul>
             </div>
           </div>

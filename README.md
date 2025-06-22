@@ -38,11 +38,15 @@ An interactive web application for training health coaches in the **solution-foc
 - Progress tracking and performance assessment
 - Retake functionality for continued learning
 
+### 🤖 AI Practice Mode
+- Real-time ChatGPT-powered roleplay with solution-focused feedback
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (version 16 or higher)
 - npm or yarn package manager
+- OpenAI API key (for AI Practice Mode)
 
 ### Installation
 
@@ -57,12 +61,15 @@ An interactive web application for training health coaches in the **solution-foc
    npm install
    ```
 
-3. **Start the development server**
+3. **Set up OpenAI API**
+   - Follow the setup instructions above
+
+4. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to `http://localhost:3000` to access the application
 
 ### Available Scripts
@@ -80,6 +87,7 @@ An interactive web application for training health coaches in the **solution-foc
 - **Routing**: React Router DOM
 - **Icons**: Lucide React
 - **State Management**: React Context API
+- **AI Integration**: OpenAI ChatGPT API
 
 ## 📁 Project Structure
 
@@ -191,4 +199,45 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Support
 
-For questions or support, please contact the development team or create an issue in the repository. 
+For questions or support, please contact the development team or create an issue in the repository.
+
+## 🤖 OpenAI API Integration
+
+The AI Practice Mode uses OpenAI's ChatGPT API to provide realistic client responses and coaching feedback. To use this feature:
+
+### Setup Instructions
+
+1. **Get an OpenAI API Key**:
+   - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   - Create an account or sign in
+   - Generate a new API key
+
+2. **Configure the API Key**:
+   - Create a file called `.env.local` in your project root directory
+   - Add your API key:
+     ```
+     VITE_OPENAI_API_KEY=your_actual_api_key_here
+     ```
+   - Optionally customize the model and settings:
+     ```
+     VITE_OPENAI_MODEL=gpt-4
+     VITE_OPENAI_TEMPERATURE=0.7
+     ```
+
+3. **Restart Development Server**:
+   - Stop your development server (Ctrl+C)
+   - Run `npm run dev` again
+
+### Security Notes
+
+- The API key is only used locally and never sent to our servers
+- The `.env.local` file is automatically ignored by Git
+- API calls are made directly from your browser to OpenAI
+- Monitor your OpenAI usage to manage costs
+
+### Features with API Integration
+
+- **Realistic Client Responses**: AI generates contextual client responses based on theme and difficulty
+- **Solution-Focused Feedback**: Real-time analysis of your coaching questions using SFBT principles
+- **DOQ Scoring**: Questions are scored 0-10 based on solution-focused approach
+- **Session Statistics**: Track your progress with above/below the line metrics 
