@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Target, BookOpen } from 'lucide-react';
 import Logo from '../components/Logo';
