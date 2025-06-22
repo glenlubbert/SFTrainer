@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
 import Navigation from './components/Navigation'
+import Home from './pages/Home'
 import Onboarding from './pages/Onboarding'
 import PracticeMode from './pages/PracticeMode'
 import TrainerMode from './pages/TrainerMode'
@@ -22,7 +23,8 @@ function App() {
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <Routes>
-          <Route path="/" element={<Onboarding />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/practice" element={
             <main className="container mx-auto px-4 py-8">
               <PracticeMode />

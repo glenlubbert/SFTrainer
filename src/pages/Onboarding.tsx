@@ -17,6 +17,9 @@ export default function Onboarding() {
     preferredLearningStyle: ''
   })
 
+  // Debug logging
+  console.log('Onboarding component rendered:', { showOnboarding, currentStep })
+
   const steps = [
     {
       title: "Welcome to Stamina Lab Coach Trainer",
@@ -138,6 +141,7 @@ export default function Onboarding() {
 
   // New: Welcome/choice screen
   if (!showOnboarding && currentStep === 0) {
+    console.log('Showing welcome screen')
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#D5EDF0] to-[#b8e0e5] flex items-center justify-center p-4">
         <div className="w-full max-w-lg">
@@ -175,6 +179,8 @@ export default function Onboarding() {
       </div>
     )
   }
+
+  console.log('Showing onboarding flow')
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D5EDF0] to-[#b8e0e5] flex items-center justify-center p-4">
